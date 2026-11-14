@@ -13,7 +13,8 @@ int diagonalDistance(int width, int height){
 }
 
 void drawLine(int ax, int ay, int bx, int by, int width, int height,
-        TGAImage &framebuffer, TGAColor col = {255, 255, 255, 255}){
+        TGAImage &framebuffer, TGAColor col = {255, 255, 255, 255})
+    {
     int noIntervals = diagonalDistance(width, height); 
     for(float t = 0; t < 1.0f; t += (1.0f / noIntervals)){
         int x = std::round(ax + t * (bx - ax)); 
