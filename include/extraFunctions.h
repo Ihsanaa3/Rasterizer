@@ -7,8 +7,10 @@
 // RANDOM 
 namespace rd{
     void randseed(); 
-    void setseed(int i); 
+    void randseed(int i); 
     int ransign();
+    int randInt(int ub);
+    int randInt();
     int randIntSign(int ub);
     float randsignf();
     float randf();

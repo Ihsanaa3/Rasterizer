@@ -7,7 +7,7 @@ void rd::randseed() {
     std::srand(static_cast<unsigned int>(std::time(nullptr))); 
 } 
 
-void rd::setseed(int i){
+void rd::randseed(int i){
     std::srand(i); 
 }
 
@@ -18,6 +18,14 @@ int rd::ransign(){
         return -1;
     } 
     return 1; 
+}
+
+int rd::randInt(int ub){
+    return (rand() % (ub+1));
+} 
+
+int rd::randInt(){
+    return rand();
 }
 
 // returns a random integer
