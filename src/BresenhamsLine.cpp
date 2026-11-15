@@ -54,10 +54,41 @@ constexpr TGAColor yellow  = {  0, 200, 255, 255};
 //     }
 // }
 
-void drawLine3(int ax, int ay, int bx, int by, 
+// void drawLine3(int ax, int ay, int bx, int by, 
+//     TGAImage &framebuffer, TGAColor col)
+// {
+//     // third approach, instead of calulating y every time, we just add onto the last coordinate 
+//     bool isSteep = std::abs(ax - bx) < std::abs(ay - by); 
+//     if(isSteep){ 
+//         // transposes steep lines so that it draws it for every y instead of x 
+//         std::swap(ax, ay); 
+//         std::swap(bx, by); 
+//     }
+//     if(ax > bx){
+//         // ensures that it is able to draw all lines from left to right 
+//         std::swap(ax, bx); 
+//         std::swap(ay, by); 
+//     }
+
+//     int y = ay; 
+//     float diff = static_cast<float>(by - ay) / static_cast<float>(bx - ax); 
+
+//     for(int x = ax; x <= bx; x++){
+//         y += std::round(diff); 
+//         if(!isSteep){
+//             framebuffer.set(x, y, col); 
+//         }else{
+//             framebuffer.set(y, x, col); 
+//         }
+//     }
+// } 
+
+void drawLine4(int ax, int ay, int bx, int by, 
     TGAImage &framebuffer, TGAColor col)
 {
-    // Second approach, uses t as a function of x instead of x as a function of t 
+    // Final approach, by using error calculations it become completely integer calculated 
+    // this is brenshams algorithm  
+    // technically slightly slower than approach 3 for reasons aa
     bool isSteep = std::abs(ax - bx) < std::abs(ay - by); 
     if(isSteep){ 
         // transposes steep lines so that it draws it for every y instead of x 
@@ -69,16 +100,17 @@ void drawLine3(int ax, int ay, int bx, int by,
         std::swap(ax, bx); 
         std::swap(ay, by); 
     }
-
-    int y = ay; 
-    float diff = static_cast<float>(by - ay) / static_cast<float>(bx - ax); 
-
-    for(int x = ax; x <= bx; x++){
-        y += std::round(diff); 
-        if(!isSteep){
-            framebuffer.set(x, y, col); 
-        }else{
-            framebuffer.set(y, x, col); 
+    int y = ay;
+    int ierror = 0;
+    for (int x=ax; x<=bx; x++) {
+        if (isSteep) // if transposed, de−transpose
+            framebuffer.set(y, x, col);
+        else
+            framebuffer.set(x, y, col);
+        ierror += 2 * std::abs(by-ay);
+        if (ierror > bx - ax) {
+            y += by > ay ? 1 : -1;
+            ierror -= 2 * (bx-ax);
         }
     }
 }
@@ -111,7 +143,7 @@ int main(int argc, char** argv){
     // drawLine2(cx, cy, bx, by, framebuffer, green); 
 
     for (int i = 0; i < 1.6e6; ++i){
-        drawLine3(rd::randInt(width), rd::randInt(height), 
+        drawLine4(rd::randInt(width), rd::randInt(height), 
                 rd::randInt(width), rd::randInt(height), framebuffer, 
                 {   static_cast<uint8_t>(rd::randInt(255)),
                     static_cast<uint8_t>(rd::randInt(255)),

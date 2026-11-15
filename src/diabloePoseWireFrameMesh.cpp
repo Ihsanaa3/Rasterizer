@@ -2,7 +2,9 @@
 #include<cmath> 
 #include<fstream> 
 #include<iostream> 
+#include<vector> 
 #include"extraFunctions.h" 
+
 
 constexpr TGAColor white   = {255, 255, 255, 255}; // attention, BGRA order
 constexpr TGAColor green   = {  0, 255,   0, 255};
@@ -42,7 +44,10 @@ void drawLine(int ax, int ay, int bx, int by,
     }
 }
 
-int main(int argc, char** argv){
+int main(int argc, char** argv){ 
+    std::vector<std::string> vectorsCoordsFromText;  
+    std::vector<float> vectorCoords; 
+    std::vector<std::string> faceIndicesFromText; 
 
     TGAImage framebuffer(width, height, TGAImage::RGB); 
 
@@ -51,8 +56,35 @@ int main(int argc, char** argv){
     std::ifstream diabloOBJ("C:/Coding/Rasterizer/res/objs/diablo3_pose.obj"); 
 
     while(std::getline(diabloOBJ, diabloText)){
-        std::cout << diabloText << std::endl; 
+        if(diabloText[0] == 'v' && diabloText[1] == ' '){ 
+            vectorsCoordsFromText.push_back(diabloText); 
+            std::cout << diabloText << std::endl; 
+        }
+        else if(diabloText[0] == 'f' && diabloText[1] == ' '){
+            faceIndicesFromText.push_back(diabloText); 
+            std::cout << diabloText << std::endl; 
+        }
     }
+    std::string s; 
+    for(auto& v: vectorsCoordsFromText){
+        for(int i = 0; i < v.length(); ++i){
+            if(v[i] == 'v'){ 
+                continue; 
+            }else if(v[i] == ' '){
+                if(!s.empty()){
+                        std::cout << s << std::endl; 
+                        vectorCoords.push_back(std::stof(s));  
+                        s = ""; // Clear s for the next number
+                    }
+            }else{
+                s += v[i]; 
+            }
+        }
+        std::cout << s << std::endl; 
+        vectorCoords.push_back(std::stof(s)); 
+        s = ""; 
+    }
+
     diabloOBJ.close(); 
     framebuffer.write_tga_file("framebuffer.tga"); 
     return 0; 
