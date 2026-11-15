@@ -18,37 +18,39 @@ constexpr int height = 640;
 void drawLine(int ax, int ay, int bx, int by, 
     TGAImage &framebuffer, TGAColor col)
 {
-    // Second approach, uses t as a function of x instead of x as a function of t 
-    bool isSteep = std::abs(ax - bx) < std::abs(ay - by); 
-    if(isSteep){ 
-        // transposes steep lines so that it draws it for every y instead of x 
-        std::swap(ax, ay); 
-        std::swap(bx, by); 
+    // Final approach, by using error calculations it become completely integer calculated 
+    // this is brenshams algorithm  
+    // technically slightly slower than approach 3 for reasons 
+    bool steep = std::abs(ax-bx) < std::abs(ay-by);
+    if (steep) { // if the line is steep, we transpose the image
+        std::swap(ax, ay);
+        std::swap(bx, by);
     }
-    if(ax > bx){
-        // ensures that it is able to draw all lines from left to right 
-        std::swap(ax, bx); 
-        std::swap(ay, by); 
+    if (ax>bx) { // make it left−to−right
+        std::swap(ax, bx);
+        std::swap(ay, by);
     }
-
-    int y = ay; 
-    float diff = static_cast<float>(by - ay) / static_cast<float>(bx - ax); 
-
-    for(int x = ax; x <= bx; x++){
-        y += std::round(diff); 
-        if(!isSteep){
-            framebuffer.set(x, y, col); 
-        }else{
-            framebuffer.set(y, x, col); 
-        }
+    int y = ay;
+    int ierror = 0;
+    for (int x=ax; x<=bx; x++) {
+        if (steep) // if transposed, de−transpose
+            framebuffer.set(y, x, col);
+        else
+            framebuffer.set(x, y, col);
+        ierror += 2 * std::abs(by-ay);
+        y += (by > ay ? 1 : -1) * (ierror > bx - ax);
+        ierror -= 2 * (bx-ax)   * (ierror > bx - ax);
     }
 }
 
 int main(int argc, char** argv){ 
     std::vector<std::string> vectorsCoordsFromText;  
-    std::vector<float> vectorCoords; 
-    std::vector<std::string> faceIndicesFromText; 
+    std::vector<float> vectorCoordsFloat; 
+    std::vector<int> vectorCoordsInt; 
 
+    std::vector<std::string> faceIndicesFromText; 
+    std::vector<std::string> faceIndicesWithSlashes; 
+    std::vector<int> faceIndicesInt; 
     TGAImage framebuffer(width, height, TGAImage::RGB); 
 
     std::string diabloText; 
@@ -65,27 +67,92 @@ int main(int argc, char** argv){
             std::cout << diabloText << std::endl; 
         }
     }
+    diabloOBJ.close(); 
+
     std::string s; 
-    for(auto& v: vectorsCoordsFromText){
-        for(int i = 0; i < v.length(); ++i){
-            if(v[i] == 'v'){ 
+    for(auto& v: vectorsCoordsFromText){ 
+        for(auto& vl: v){
+            if(vl == 'v'){ 
                 continue; 
-            }else if(v[i] == ' '){
+            }else if(vl == ' '){
                 if(!s.empty()){
                         std::cout << s << std::endl; 
-                        vectorCoords.push_back(std::stof(s));  
+                        vectorCoordsFloat.push_back(std::stof(s));  
                         s = ""; // Clear s for the next number
                     }
             }else{
-                s += v[i]; 
+                s += vl; 
             }
         }
         std::cout << s << std::endl; 
-        vectorCoords.push_back(std::stof(s)); 
+        vectorCoordsFloat.push_back(std::stof(s)); 
         s = ""; 
+    } 
+    for(auto& fs: faceIndicesFromText){
+        for(auto& fl : fs){
+            if(fl == 'f'){
+                continue;
+            }else if(fl == ' '){
+                if(!s.empty()){
+                    std::cout << s << std::endl; 
+                    faceIndicesWithSlashes.push_back(s); 
+                    s = ""; 
+                }
+            }else{
+                s += fl; 
+            }
+        }
+        std::cout << s << std::endl; 
+        faceIndicesWithSlashes.push_back(s); 
+        s = ""; 
+    } 
+
+    for(auto& f: faceIndicesWithSlashes){
+        for(auto& fl: f){
+            if(fl == '/'){
+                std::cout << s << std::endl; 
+                faceIndicesInt.push_back(std::stoi(s)); 
+                s = ""; 
+                break;
+            }else{
+                s += fl; 
+            }
+        }
     }
 
-    diabloOBJ.close(); 
-    framebuffer.write_tga_file("framebuffer.tga"); 
+    int imod = 0;
+    for(auto& v: vectorCoordsFloat){
+        if(imod % 3 == 0){
+            vectorCoordsInt.push_back(std::round(((v + 1) / 2) * width)); 
+        }else if(imod % 3 == 1){
+            vectorCoordsInt.push_back(std::round(((v + 1) / 2) * height)); 
+        }
+        imod += 1; 
+    } 
+
+    for (int i = 0; i < faceIndicesInt.size(); i += 3) {
+        // 1. Get the 3 vertex indices for the triangle face
+        // Note: If your face indices from the OBJ file are 1-based, make sure to subtract 1 (e.g., index - 1)
+        int idx0 = faceIndicesInt[i] - 1;
+        int idx1 = faceIndicesInt[i + 1] - 1;
+        int idx2 = faceIndicesInt[i + 2] - 1;
+
+        // 2. Look up the X and Y screen coordinates (* 2 for X, * 2 + 1 for Y)
+        int x0 = vectorCoordsInt[idx0 * 2];
+        int y0 = vectorCoordsInt[idx0 * 2 + 1];
+
+        int x1 = vectorCoordsInt[idx1 * 2];
+        int y1 = vectorCoordsInt[idx1 * 2 + 1];
+
+        int x2 = vectorCoordsInt[idx2 * 2];
+        int y2 = vectorCoordsInt[idx2 * 2 + 1];
+
+        // 3. Draw the 3 edges connecting the triangle
+        drawLine(x0, y0, x1, y1, framebuffer, red);
+        drawLine(x1, y1, x2, y2, framebuffer, red);
+        drawLine(x2, y2, x0, y0, framebuffer, red);
+    }
+
+    framebuffer.write_tga_file("diablo3PoseWireFrame.tga"); 
     return 0; 
 }
