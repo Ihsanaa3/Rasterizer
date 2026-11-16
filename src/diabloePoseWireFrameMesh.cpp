@@ -12,8 +12,8 @@ constexpr TGAColor red     = {  0,   0, 255, 255};
 constexpr TGAColor blue    = {255, 128,  64, 255};
 constexpr TGAColor yellow  = {  0, 200, 255, 255}; 
 
-constexpr int width = 640; 
-constexpr int height = 640; 
+constexpr int width = 980; 
+constexpr int height = 980; 
 
 void drawLine(int ax, int ay, int bx, int by, 
     TGAImage &framebuffer, TGAColor col)
@@ -131,13 +131,11 @@ int main(int argc, char** argv){
     } 
 
     for (int i = 0; i < faceIndicesInt.size(); i += 3) {
-        // 1. Get the 3 vertex indices for the triangle face
-        // Note: If your face indices from the OBJ file are 1-based, make sure to subtract 1 (e.g., index - 1)
         int idx0 = faceIndicesInt[i] - 1;
         int idx1 = faceIndicesInt[i + 1] - 1;
         int idx2 = faceIndicesInt[i + 2] - 1;
 
-        // 2. Look up the X and Y screen coordinates (* 2 for X, * 2 + 1 for Y)
+        // Look up the X and Y screen coordinates (* 2 for X, * 2 + 1 for Y)
         int x0 = vectorCoordsInt[idx0 * 2];
         int y0 = vectorCoordsInt[idx0 * 2 + 1];
 
@@ -147,10 +145,13 @@ int main(int argc, char** argv){
         int x2 = vectorCoordsInt[idx2 * 2];
         int y2 = vectorCoordsInt[idx2 * 2 + 1];
 
-        // 3. Draw the 3 edges connecting the triangle
         drawLine(x0, y0, x1, y1, framebuffer, red);
         drawLine(x1, y1, x2, y2, framebuffer, red);
         drawLine(x2, y2, x0, y0, framebuffer, red);
+    } 
+
+    for(int i = 0; i < vectorCoordsInt.size(); i += 2){
+        framebuffer.set(vectorCoordsInt[i], vectorCoordsInt[i + 1], white); 
     }
 
     framebuffer.write_tga_file("diablo3PoseWireFrame.tga"); 
