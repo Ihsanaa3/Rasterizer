@@ -7,8 +7,6 @@
 // constexpr TGAColor yellow  = {  0, 200, 255, 255}; 
 
 namespace drt{
-    
-    void drawLine4(int ax, int ay, int bx, int by, 
-        TGAImage &framebuffer, TGAColor col);
-    
+    void drawLine4(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor col); 
+    void drawBorder(int width, int height, TGAImage& frambuffer, TGAColor col = {255, 255, 255, 255}); 
 }

@@ -27,4 +27,11 @@ void drt::drawLine4(int ax, int ay, int bx, int by,
         y += (by > ay ? 1 : -1) * (ierror > bx - ax);
         ierror -= 2 * (bx-ax)   * (ierror > bx - ax);
     }
+} 
+
+void drt::drawBorder(int width, int height, TGAImage& frambuffer, TGAColor col){
+    drt::drawLine4(0, 0, width, 0, frambuffer, col);
+    drt::drawLine4(width - 1, 0, width - 1, height, frambuffer, col);
+    drt::drawLine4(width, height - 1, 0, height - 1, frambuffer, col); 
+    drt::drawLine4(0, height, 0, 0, frambuffer, col);
 }
