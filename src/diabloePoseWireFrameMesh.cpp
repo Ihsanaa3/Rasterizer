@@ -4,6 +4,7 @@
 #include<iostream> 
 #include<vector> 
 #include"extraFunctions.h" 
+#include"relativeResPath.h"
 
 
 constexpr TGAColor white   = {255, 255, 255, 255}; // attention, BGRA order
@@ -55,7 +56,7 @@ int main(int argc, char** argv){
 
     std::string diabloText; 
 
-    std::ifstream diabloOBJ("C:/Coding/Rasterizer/res/objs/diablo3_pose.obj"); 
+    std::ifstream diabloOBJ(rrp::getObjsPath() + "diablo3_pose.obj"); 
 
     while(std::getline(diabloOBJ, diabloText)){
         if(diabloText[0] == 'v' && diabloText[1] == ' '){ 
