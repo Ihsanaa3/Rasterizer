@@ -8,7 +8,7 @@ CFLAGS   = -Wall -Iinclude
 
 # List your stationary backend files (now including glad.c inside hsource)
 HSOURCE_SRCS =  hsource/extraFunctions.cpp hsource/rotation.cpp \
-				hsource/tgaimage.cpp
+				hsource/tgaimage.cpp hsource/relativeResPath.cpp 
 			
 # Automatically turns all .cpp and .c files in HSOURCE_SRCS into .o paths
 OBJS = $(patsubst hsource/%.cpp,hsource/%.o,$(filter %.cpp,$(HSOURCE_SRCS))) \
