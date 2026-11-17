@@ -17,6 +17,11 @@ void triangleWireFrame(int ax, int ay, int bx, int by, int cx, int cy,
         drt::drawLine4(ax, ay, cx, cy ,framebuffer, col); 
     }
 
+void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,
+    TGAImage& framebuffer, TGAColor col = white){
+        
+    }
+
 int main(int argc, char** argv){
     constexpr int width = 320; 
     constexpr int height = 320; 
