@@ -11,7 +11,7 @@ void drt::drawLine4(int ax, int ay, int bx, int by,
     if (steep) { // if the line is steep, we transpose the image
         std::swap(ax, ay);
         std::swap(bx, by);
-    }
+    } 
     if (ax>bx) { // make it left−to−right
         std::swap(ax, bx);
         std::swap(ay, by);
