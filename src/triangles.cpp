@@ -47,52 +47,26 @@ std::vector<std::array<int, 2>> coordsInts(int ax, int ay, int bx, int by){
     return coords; 
 }
 
-void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,  
-    TGAImage& framebuffer, TGAColor col = white)
-{
+std::vector<std::array<int, 2>> getSortedTriangleCoords(int ax, int ay, int bx, int by, int cx, int cy){
     std::vector<std::array<int, 2>> coordsab = coordsInts(ax, ay, bx, by); 
     std::vector<std::array<int, 2>> coordsbc = coordsInts(cx, cy, bx, by); 
     std::vector<std::array<int, 2>> coordsac = coordsInts(ax, ay, cx, cy);  
     std::vector<std::array<int, 2>> coords; 
-    std::vector<int> ys ={ay, by, cy}; 
 
     for(auto& v: coordsab){coords.push_back(v); }
     for(auto& v: coordsbc){coords.push_back(v); }
     for(auto& v: coordsac){coords.push_back(v); }
 
     std::sort(coords.begin(), coords.end(), [](const auto& a, const auto& b) {return a[1] > b[1];});   
-    
-    for (auto& v: coords){
-        std::cout << v[0] << " " << v[1] << std::endl; 
-    }
 
-    // int min = 0, max = 0; 
-    // for(int i = *std::max_element(ys.begin(), ys.end()); i >= *std::min_element(ys.begin(), ys.end()); i--){
-    //     for(auto& v: coords){
-    //         if(v[1] == i){
-    //             if(i > max){
-    //                 max = v[0]; 
-    //             }else if(i > max && min == 0){
-    //                 min = v[0]; 
-    //                 std::swap(max, min); 
-    //             }
-    //             else if(i < max && min == 0){
-    //                 min = i; 
-    //             }else if(i < min){
-    //                 min = v[0]; 
-    //             }
-    //         }
-    //     }
-    //     if(max == 0){
-    //         continue; 
-    //     }else if(min == 0 && max != 0){
-    //         framebuffer.set(max, i, col); 
-    //     }else{
-    //         drt::drawLine4(min, i, max, i, framebuffer, col); 
-    //     }
-    //     min = 0;  
-    //     max = 0;
-    // 
+    return coords; 
+}
+
+void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,  
+    TGAImage& framebuffer, TGAColor col = white)
+{ 
+    std::vector<std::array<int, 2>> coords = getSortedTriangleCoords(ax, ay, bx, by, cx, cy); 
+    std::vector<int> ys ={ay, by, cy}; 
 
     int max_y = *std::max_element(ys.begin(), ys.end());
     int min_y = *std::min_element(ys.begin(), ys.end());
