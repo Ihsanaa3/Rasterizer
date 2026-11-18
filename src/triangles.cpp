@@ -1,5 +1,6 @@
 #include<tgaimage.h> 
 #include<iostream> 
+#include<algorithm>
 #include"drawTools.h" 
 #include<array>
 #include<vector> 
@@ -46,23 +47,78 @@ std::vector<std::array<int, 2>> coordsInts(int ax, int ay, int bx, int by){
     return coords; 
 }
 
-void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,
+void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,  
     TGAImage& framebuffer, TGAColor col = white)
 {
     std::vector<std::array<int, 2>> coordsab = coordsInts(ax, ay, bx, by); 
     std::vector<std::array<int, 2>> coordsbc = coordsInts(cx, cy, bx, by); 
     std::vector<std::array<int, 2>> coordsac = coordsInts(ax, ay, cx, cy);  
+    std::vector<std::array<int, 2>> coords; 
+    std::vector<int> ys ={ay, by, cy}; 
+
+    for(auto& v: coordsab){coords.push_back(v); }
+    for(auto& v: coordsbc){coords.push_back(v); }
+    for(auto& v: coordsac){coords.push_back(v); }
+
+    std::sort(coords.begin(), coords.end(), [](const auto& a, const auto& b) {return a[1] > b[1];});   
     
-    for (auto& v: coordsab){
+    for (auto& v: coords){
         std::cout << v[0] << " " << v[1] << std::endl; 
     }
-    std::cout <<" nl" << std::endl; 
-    for (auto& v: coordsac){
-        std::cout << v[0] << " " << v[1] << std::endl; 
-    }
-    std::cout <<" nl" << std::endl; 
-    for (auto& v: coordsbc){
-        std::cout << v[0] << " " << v[1] << std::endl; 
+
+    // int min = 0, max = 0; 
+    // for(int i = *std::max_element(ys.begin(), ys.end()); i >= *std::min_element(ys.begin(), ys.end()); i--){
+    //     for(auto& v: coords){
+    //         if(v[1] == i){
+    //             if(i > max){
+    //                 max = v[0]; 
+    //             }else if(i > max && min == 0){
+    //                 min = v[0]; 
+    //                 std::swap(max, min); 
+    //             }
+    //             else if(i < max && min == 0){
+    //                 min = i; 
+    //             }else if(i < min){
+    //                 min = v[0]; 
+    //             }
+    //         }
+    //     }
+    //     if(max == 0){
+    //         continue; 
+    //     }else if(min == 0 && max != 0){
+    //         framebuffer.set(max, i, col); 
+    //     }else{
+    //         drt::drawLine4(min, i, max, i, framebuffer, col); 
+    //     }
+    //     min = 0;  
+    //     max = 0;
+    // 
+
+    int max_y = *std::max_element(ys.begin(), ys.end());
+    int min_y = *std::min_element(ys.begin(), ys.end());
+
+    for(int i = max_y; i >= min_y; i--){
+        int min_x = 1e9;
+        int max_x = -1e9;
+        bool found = false;
+
+        for(auto& v: coords){
+            if(v[1] == i){
+                if(v[0] < min_x) min_x = v[0];
+                if(v[0] > max_x) max_x = v[0];
+                found = true;
+            }
+        }
+
+        if(!found){
+            continue; 
+        }
+
+        if(min_x == max_x){
+            framebuffer.set(min_x, i, col); 
+        } else {
+            drt::drawLine4(min_x, i, max_x, i, framebuffer, col); 
+        }
     }
 }
 
@@ -73,8 +129,8 @@ int main(int argc, char** argv){
     drt::drawBorder(width, height, framebuffer); 
     
     triangleFill(  7, 45, 35, 100, 45,  60, framebuffer, red);
-    triangleWireFrame(120, 35, 90,   5, 45, 110, framebuffer, white);
-    triangleWireFrame(115, 83, 80,  90, 85, 120, framebuffer, green); 
+    triangleFill(120, 35, 90,   5, 45, 110, framebuffer, white);
+    triangleFill(115, 83, 80,  90, 85, 120, framebuffer, green); 
 
     framebuffer.write_tga_file("framebuffer.tga"); 
     return 0; 
