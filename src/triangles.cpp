@@ -4,6 +4,7 @@
 #include"drawTools.h" 
 #include<array>
 #include<vector> 
+#include"extraFunctions.h"
 
 constexpr TGAColor white   = {255, 255, 255, 255}; // attention, BGRA order
 constexpr TGAColor green   = {  0, 255,   0, 255};
@@ -97,14 +98,21 @@ void triangleFill(int ax, int ay, int bx, int by, int cx, int cy,
 }
 
 int main(int argc, char** argv){
-    constexpr int width = 320; 
-    constexpr int height = 320; 
+    constexpr int width = 900; 
+    constexpr int height = 900; 
     TGAImage framebuffer(width, height, TGAImage::RGB); 
     drt::drawBorder(width, height, framebuffer); 
     
-    triangleFill(  7, 45, 35, 100, 45,  60, framebuffer, red);
-    triangleFill(120, 35, 90,   5, 45, 110, framebuffer, white);
-    triangleFill(115, 83, 80,  90, 85, 120, framebuffer, green); 
+    for (int i = 0; i < 100; i++){
+        triangleFill(
+        rd::randInt(width), rd::randInt(height), rd::randInt(width), 
+        rd::randInt(height), rd::randInt(width), rd::randInt(height), framebuffer, 
+        {static_cast<uint8_t>(rd::randInt(255)),
+                    static_cast<uint8_t>(rd::randInt(255)),
+                    static_cast<uint8_t>(rd::randInt(255)),
+                    static_cast<uint8_t>(rd::randInt(255))
+                }); 
+    }
 
     framebuffer.write_tga_file("framebuffer.tga"); 
     return 0; 
